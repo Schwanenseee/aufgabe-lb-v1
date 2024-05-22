@@ -22,7 +22,7 @@ spec:
           imagePullPolicy: Always
           restartPolicy: Always
           ports:
-            - containerPort: 80
+            - containerPort: 5050
               protocol: TCP
           env:
             - name: POSTGRESQL_USER
