@@ -1,0 +1,20 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: postgresadmin
+  labels:
+    app: postgresadmin
+    app.kubernetes.io/part-of: aufgabe-lb-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresadmin
+    spec:
+      containers:
+        - name: postgresadmin
+          image: ghcr.io/modul-i-ch-109/pgadmin4:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+              protocol: TCP

@@ -18,3 +18,6 @@ spec:
           ports:
             - containerPort: 8081
               protocol: TCP
+          env:
+            - name: npm_config_cache
+              value: ./.npm-cache

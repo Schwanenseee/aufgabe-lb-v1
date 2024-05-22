@@ -1,16 +1,16 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: counter-frontend
+  name: postgresadmin
   labels:
-    app: counter-frontend
+    app: postgresadmin
     app.kubernetes.io/part-of: aufgabe-lb-v1
 spec:
   to:
     kind: Service
-    name: counter-frontend
+    name: postgresadmin
   port:
-    targetPort: 8081-tcp
+    targetPort: 8082-tcp
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect

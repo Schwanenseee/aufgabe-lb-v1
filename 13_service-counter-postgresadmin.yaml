@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgresadmin
+  labels:
+    app: postgresadmin
+    app.kubernetes.io/part-of: aufgabe-lb-v1
+spec:
+  ports:
+    - name: postgresadmin
+      protocol: TCP
+      port: 8082
+      targetPort: 8082
+  type: ClusterIP
+  sessionAffinity: None
+  selector:
+    app: postgresadmin
