@@ -27,3 +27,8 @@ spec:
           env:
             - name: npm_config_cache
               value: ./.npm-cache
+            - name: BACKEND_URL
+            valueFrom:
+              configMapKeyRef:
+                name: counter-config
+                key: backend-url
