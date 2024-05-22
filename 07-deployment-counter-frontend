@@ -20,7 +20,6 @@ spec:
         - name: counter-frontend
           image: ghcr.io/schwanenseee/counter-frontend:v1
           imagePullPolicy: Always
-          restartPolicy: Always
           ports:
             - containerPort: 8081
               protocol: TCP
@@ -28,7 +27,7 @@ spec:
             - name: npm_config_cache
               value: ./.npm-cache
             - name: BACKEND_URL
-            valueFrom:
-              configMapKeyRef:
-                name: counter-config
-                key: backend-url
+              valueFrom:
+                configMapKeyRef:
+                  name: counter-config
+                  key: backend-url
