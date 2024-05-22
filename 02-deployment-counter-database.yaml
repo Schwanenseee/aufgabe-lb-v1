@@ -15,6 +15,10 @@ spec:
       labels:
         app: counter-database
     spec:
+      volumes:
+        - name: counter-database-data
+          persistentVolumeClaim:
+            claimName: counter-database
       containers:
         - name: counter-database
           image: quay.io/centos7/postgresql-10-centos7:20221109
