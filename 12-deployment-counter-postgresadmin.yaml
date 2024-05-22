@@ -10,6 +10,11 @@ spec:
   selector:
     matchLabels:
       app: postgresadmin
+  template:
+    metadata:
+      labels:
+        app: postgresadmin
+        app.kubernetes.io/part-of: aufgabe-lb-v1
     spec:
       containers:
         - name: postgresadmin
@@ -18,3 +23,19 @@ spec:
           ports:
             - containerPort: 8082
               protocol: TCP
+          env:
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: counter-database
+                  key: database-user
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: counter-database
+                  key: database-password
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: counter-database
+                  key: database-name

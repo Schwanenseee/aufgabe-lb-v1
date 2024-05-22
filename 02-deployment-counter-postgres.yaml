@@ -12,6 +12,7 @@ spec:
       labels:
         app: counter-database
         app.kubernetes.io/part-of: aufgabe-lb-v1
+    spec:
       containers:
         - name: counter-database
           image: quay.io/centos7/postgresql-10-centos7:20221109

@@ -10,6 +10,11 @@ spec:
   selector:
     matchLabels:
       app: counter-frontend
+  template:
+    metadata:
+      labels:
+        app: counter-frontend
+        app.kubernetes.io/part-of: aufgabe-lb-v1
     spec:
       containers:
         - name: counter-frontend

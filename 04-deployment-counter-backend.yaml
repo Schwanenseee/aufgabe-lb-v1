@@ -10,6 +10,11 @@ spec:
   selector:
     matchLabels:
       app: counter-backend
+  template:
+    metadata:
+      labels:
+        app: counter-backend
+        app.kubernetes.io/part-of: aufgabe-lb-v1
     spec:
       containers:
         - name: counter-backend
@@ -19,18 +24,18 @@ spec:
             - containerPort: 8080
               protocol: TCP
           env:
-            - name: MYSQL_USER
+            - name: POSTGRESQL_USER
               valueFrom:
                 secretKeyRef:
                   name: counter-database
                   key: database-user
-            - name: MYSQL_PASSWORD
+            - name: POSTGRESQL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: counter-database
                   key: database-password
-            - name: MYSQL_ROOT_PASSWORD
+            - name: POSTGRESQL_DATABASE
               valueFrom:
                 secretKeyRef:
                   name: counter-database
-                  key: database-root-password
+                  key: database-name
