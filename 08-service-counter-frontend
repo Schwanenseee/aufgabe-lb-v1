@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: counter-frontend
+  labels:
+    app: counter-frontend
+    app.kubernetes.io/part-of: aufgabe-lb-v1
+spec:
+  ports:
+    - name: counter-frontend
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+  type: ClusterIP
+  sessionAffinity: None
+  selector:
+    app: counter-frontend

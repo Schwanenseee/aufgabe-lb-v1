@@ -1,0 +1,17 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: counter-backend
+  labels:
+    app: counter-backend
+    app.kubernetes.io/part-of: aufgabe-lb-v1
+spec:
+  ports:
+    - name: counter-backend
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+  sessionAffinity: None
+  selector:
+    app: counter-backend

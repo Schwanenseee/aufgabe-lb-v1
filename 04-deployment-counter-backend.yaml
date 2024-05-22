@@ -1,0 +1,36 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: counter-backend
+  labels:
+    app: counter-backend
+    app.kubernetes.io/part-of: aufgabe-lb-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: counter-backend
+    spec:
+      containers:
+        - name: counter-backend
+          image: ghcr.io/schwanenseee/counter-backend:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: counter-database
+                  key: database-user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: counter-database
+                  key: database-password
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: counter-database
+                  key: database-root-password
