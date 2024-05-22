@@ -14,11 +14,13 @@ spec:
     metadata:
       labels:
         app: postgresadmin
+        deployment: postgresadmin
     spec:
       containers:
         - name: postgresadmin
           image: ghcr.io/modul-i-ch-109/pgadmin4:latest
           imagePullPolicy: Always
+          restartPolicy: Always
           ports:
             - containerPort: 8082
               protocol: TCP

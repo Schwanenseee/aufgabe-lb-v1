@@ -14,11 +14,13 @@ spec:
     metadata:
       labels:
         app: counter-frontend
+        deployment: counter-frontend
     spec:
       containers:
         - name: counter-frontend
           image: ghcr.io/schwanenseee/counter-frontend:v1
           imagePullPolicy: Always
+          restartPolicy: Always
           ports:
             - containerPort: 8081
               protocol: TCP
