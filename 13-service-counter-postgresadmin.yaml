@@ -7,10 +7,10 @@ metadata:
     app.kubernetes.io/part-of: aufgabe-lb-v1
 spec:
   ports:
-    - name: 8082-tcp
+    - name: 5050-tcp
       protocol: TCP
       port: 5050
-      targetPort: 8082
+      targetPort: 5050
   type: ClusterIP
   sessionAffinity: None
   selector:

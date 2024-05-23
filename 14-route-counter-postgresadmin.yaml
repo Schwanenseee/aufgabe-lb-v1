@@ -10,7 +10,7 @@ spec:
     kind: Service
     name: postgresadmin
   port:
-    targetPort: 8082-tcp
+    targetPort: 5050-tcp
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
