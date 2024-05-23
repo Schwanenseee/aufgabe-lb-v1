@@ -1,0 +1,361 @@
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: counter-app
+  annotations:
+    openshift.io/display-name: "Counter Application"
+    description: "A Counter Application Example"
+    iconClass: "icon-play"
+    tags: "counter"
+
+parameters:
+  - name: SOURCE_IMAGE_URL_BACKEND
+    description: Url zum backend docker image
+    value: ghcr.io/schwanenseee/counter-backend:v1
+    required: true
+
+  - name: SOURCE_IMAGE_URL_FRONTEND
+    description: Url zum frontend-docker-image
+    value: ghcr.io/schwanenseee/counter-frontend:v1
+    required: true
+
+  - name: POSTGRESQL_DATABASE
+    description: The Name of the Database
+    value: counterdb
+    required: true
+
+  - name: POSTGRESQL_USER
+    description: The user for the Database
+    value: counteruser
+    required: true
+
+  - name: POSTGRESQL_PASSWORD
+    description: The password for the Database
+    value: counterpass
+    required: true
+
+objects:
+# Hier beginnt der Inhalt von 01-secret.yaml
+  - kind: Secret
+    apiVersion: v1
+    metadata:
+      name: counter-database
+      labels:
+        app: counter-database
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+      annotations:
+        template.openshift.io/expose-username: "{.data['database-user']}"
+        template.openshift.io/expose-password: "{.data['database-password']}"
+        template.openshift.io/expose-database_name: "{.data['database-name']}"
+    stringData:
+      database-user: "${POSTGRESQL_USER}"
+      database-password: "${POSTGRESQL_PASSWORD}"
+      database-name: "${POSTGRESQL_DATABASE}"
+# Hier beginnt der Inhalt von 02-deployment-counter-database.yaml
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      name: counter-database
+      labels:
+        app: counter-database
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: counter-database
+      template:
+        metadata:
+          labels:
+            app: counter-database
+        spec:
+          volumes:
+            - name: counter-database-data
+              persistentVolumeClaim:
+                claimName: counter-database
+          containers:
+            - name: counter-database
+              image: quay.io/centos7/postgresql-10-centos7:20221109
+              imagePullPolicy: Always
+              ports:
+                - containerPort: 5432
+              volumeMounts:
+                - name: counter-database-data
+                  mountPath: /var/lib/pgsql/data
+              env:
+                - name: POSTGRESQL_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: counter-database
+                      key: database-user
+                - name: POSTGRESQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: counter-database
+                      key: database-password
+                - name: POSTGRESQL_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: counter-database
+                      key: database-name
+# Hier beginnt der Inhalt von 03-service-counter-database.yaml
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: counter-database
+      labels:
+        app: counter-database
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      ports:
+        - name: 5432-tcp
+          protocol: TCP
+          port: 5432
+          targetPort: 5432
+      type: ClusterIP
+      sessionAffinity: None
+      selector:
+        app: counter-database
+# Hier beginnt der Inhalt von 04-deployment-counter-backend.yaml
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      name: counter-backend
+      labels:
+        app: counter-backend
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: counter-backend
+      template:
+        metadata:
+          labels:
+            app: counter-backend
+            deployment: counter-backend
+        spec:
+          containers:
+            - name: counter-backend
+              image: ${SOURCE_IMAGE_URL_BACKEND}
+              imagePullPolicy: Always
+              restartPolicy: Always
+              ports:
+                - containerPort: 8080
+                  protocol: TCP
+              env:
+                - name: DB_HOST
+                  valueFrom:
+                    configMapKeyRef:
+                      name: counter-config
+                      key: database-host
+                - name: DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: counter-database
+                      key: database-user
+                - name: DB_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: counter-database
+                      key: database-name
+                - name: DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: counter-database
+                      key: database-password
+                - name: npm_config_cache
+                  value: ./.npm-cache
+# Hier beginnt der Inhalt von 05-service-counter-backend.yaml
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: counter-backend
+      labels:
+        app: counter-backend
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      ports:
+        - name: 8080-tcp
+          protocol: TCP
+          port: 8080
+          targetPort: 8080
+      type: ClusterIP
+      sessionAffinity: None
+      selector:
+        app: counter-backend
+# Hier beginnt der Inhalt von 06-route-counter-backend.yaml
+  - kind: Route
+    apiVersion: route.openshift.io/v1
+    metadata:
+      name: counter-backend
+      labels:
+        app: counter-backend
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      to:
+        kind: Service
+        name: counter-backend
+      port:
+        targetPort: 8080-tcp
+      tls:
+        termination: edge
+        insecureEdgeTerminationPolicy: Redirect
+    selector:
+      app: counter-backend
+# Hier beginnt der Inhalt von 07-deployment-counter-frontend.yaml
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      name: counter-frontend
+      labels:
+        app: counter-frontend
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: counter-frontend
+      template:
+        metadata:
+          labels:
+            app: counter-frontend
+            deployment: counter-frontend
+        spec:
+          containers:
+            - name: counter-frontend
+              image: ${SOURCE_IMAGE_URL_FRONTEND}
+              imagePullPolicy: Always
+              ports:
+                - containerPort: 8081
+                  protocol: TCP
+              env:
+                - name: npm_config_cache
+                  value: ./.npm-cache
+                - name: BACKEND_URL
+                  valueFrom:
+                    configMapKeyRef:
+                      name: counter-config
+                      key: backend-url
+# Hier beginnt der Inhalt von 08-service-counter-frontend.yaml
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: counter-frontend
+      labels:
+        app: counter-frontend
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      ports:
+        - name: 3000-tcp
+          protocol: TCP
+          port: 3000
+          targetPort: 3000
+      type: ClusterIP
+      sessionAffinity: None
+      selector:
+        app: counter-frontend
+# Hier beginnt der Inhalt von 09-route-counter-frontend.yaml
+  - kind: Route
+    apiVersion: route.openshift.io/v1
+    metadata:
+      name: counter-frontend
+      labels:
+        app: counter-frontend
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      to:
+        kind: Service
+        name: counter-frontend
+      port:
+        targetPort: 3000-tcp
+      tls:
+        termination: edge
+        insecureEdgeTerminationPolicy: Redirect
+    selector:
+      app: counter-frontend
+# Hier beginnt der Inhalt von 12-deployment-counter-postgresadmin.yam
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      name: postgresadmin
+      labels:
+        app: postgresadmin
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: postgresadmin
+      template:
+        metadata:
+          labels:
+            app: postgresadmin
+            deployment: postgresadmin
+        spec:
+          containers:
+            - name: postgresadmin
+              image: ghcr.io/modul-i-ch-109/pgadmin4:latest
+              imagePullPolicy: Always
+              restartPolicy: Always
+              ports:
+                - containerPort: 5050
+                  protocol: TCP
+              env:
+                - name: PGADMIN_DEFAULT_EMAIL
+                  value: test@test.com
+                - name: PGADMIN_DEFAULT_PASSWORD
+                  value: test
+# Hier beginnt der Inhalt von 13-service-counter-postgresadmin.yaml
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: postgresadmin
+      labels:
+        app: postgresadmin
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      ports:
+        - name: 5050-tcp
+          protocol: TCP
+          port: 5050
+          targetPort: 5050
+      type: ClusterIP
+      sessionAffinity: None
+      selector:
+        app: postgresadmin
+# Hier beginnt der Inhalt von 14-route-counter-postgresadmin.yaml
+  - kind: Route
+    apiVersion: route.openshift.io/v1
+    metadata:
+      name: postgresadmin
+      labels:
+        app: postgresadmin
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      to:
+        kind: Service
+        name: postgresadmin
+      port:
+        targetPort: 5050-tcp
+      tls:
+        termination: edge
+        insecureEdgeTerminationPolicy: Redirect
+    selector:
+      app: postgresadmin
+# Hier beginnt der Inhalt von 15-pvc-counter-database.yaml
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: counter-database
+  labels:
+    app: counter-database
+    app.kubernetes.io/part-of: aufgabe-lb-v1-template
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: rbd-storagepool-cluster
+  volumeMode: Filesystem

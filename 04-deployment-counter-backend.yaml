@@ -14,7 +14,7 @@ spec:
     metadata:
       labels:
         app: counter-backend
-        deployment: counter-database
+        deployment: counter-backend
     spec:
       containers:
         - name: counter-backend
