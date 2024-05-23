@@ -344,18 +344,18 @@ objects:
     selector:
       app: postgresadmin
 # Hier beginnt der Inhalt von 15-pvc-counter-database.yaml
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: counter-database
-  labels:
-    app: counter-database
-    app.kubernetes.io/part-of: aufgabe-lb-v1-template
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: rbd-storagepool-cluster
-  volumeMode: Filesystem
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: counter-database
+      labels:
+        app: counter-database
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: rbd-storagepool-cluster
+      volumeMode: Filesystem
