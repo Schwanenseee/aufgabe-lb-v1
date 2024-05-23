@@ -25,6 +25,9 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 5432
+          volumeMounts:
+            - name: counter-database-data
+              mountPath: /var/lib/pgsql/data
           env:
             - name: POSTGRESQL_USER
               valueFrom:
