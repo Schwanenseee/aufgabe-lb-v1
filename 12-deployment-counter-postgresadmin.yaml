@@ -25,21 +25,6 @@ spec:
             - containerPort: 5050
               protocol: TCP
           env:
-            - name: POSTGRESQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: counter-database
-                  key: database-user
-            - name: POSTGRESQL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: counter-database
-                  key: database-password
-            - name: POSTGRESQL_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: counter-database
-                  key: database-name
             - name: PGADMIN_DEFAULT_EMAIL
               value: test@test.com
             - name: PGADMIN_DEFAULT_PASSWORD
