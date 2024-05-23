@@ -274,6 +274,44 @@ objects:
         insecureEdgeTerminationPolicy: Redirect
     selector:
       app: counter-frontend
+# Hier beginnt der Inhalt von 10-horizontal-pod-autoscaler-backend.yaml
+  - kind: HorizontalPodAutoscaler
+    apiVersion: autoscaling/v2
+    metadata:
+      name: counter-backend
+    spec:
+      scaleTargetRef:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: counter-backend
+      minReplicas: 2
+      maxReplicas: 2
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              averageUtilization: 50
+              type: Utilization
+# Hier beginnt der Inhalt von 11-horizontal-pod-autoscaler-frontend.yaml
+  - kind: HorizontalPodAutoscaler
+    apiVersion: autoscaling/v2
+    metadata:
+      name: counter-frontend
+    spec:
+      scaleTargetRef:
+        apiVersion: apps/v1
+        kind: Deployment
+        name: counter-frontend
+      minReplicas: 2
+      maxReplicas: 4
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              averageUtilization: 50
+              type: Utilization
 # Hier beginnt der Inhalt von 12-deployment-counter-postgresadmin.yam
   - kind: Deployment
     apiVersion: apps/v1
