@@ -279,6 +279,9 @@ objects:
     apiVersion: autoscaling/v2
     metadata:
       name: counter-backend
+    labels:
+      app: counter-backend
+      app.kubernetes.io/part-of: aufgabe-lb-v1-template
     spec:
       scaleTargetRef:
         apiVersion: apps/v1
@@ -298,6 +301,9 @@ objects:
     apiVersion: autoscaling/v2
     metadata:
       name: counter-frontend
+      labels:
+        app: counter-frontend
+        app.kubernetes.io/part-of: aufgabe-lb-v1-template
     spec:
       scaleTargetRef:
         apiVersion: apps/v1
